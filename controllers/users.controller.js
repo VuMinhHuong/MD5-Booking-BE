@@ -7,7 +7,7 @@ let strongRegex = new RegExp(
 module.exports.getAll = (req, res) => {
   db.execute("SELECT*FROM users ")
     .then((data) => {
-      console.log(data[0]);
+      // console.log(data[0]);
       res.send(data[0]);
     })
     .catch((err) => {
@@ -17,32 +17,26 @@ module.exports.getAll = (req, res) => {
 module.exports.getHomePage = (req, res) => {};
 module.exports.login = (req, res) => {
   let { email, password } = req.body;
-  if (!email) {
+  if (!email || !password) {
     return res.status(500).json({
-      message: "Invalid email",
+      message: "Invalid email or password",
     });
   }
-  if (!password) {
-    return res.status(500).json({
-      message: "Invalid password",
-    });
-  }
-
   db.execute("SELECT*FROM users WHERE email=?", [email]).then((data) => {
     let find = data[0][0];
     if (!find) {
       res.status(404).json({
-        message: "Email is not exits",
+        message: "user is not exits",
       });
     } else {
       if (!find.password) {
         res.status(404).json({
-          message: "Wrong password",
+          message: "wrong password",
         });
       } else if (find.password !== password) {
         res.status(200).json({
           status: "wrong",
-          message: "Wrong passsword",
+          message: "sai passs",
         });
       } else {
         res.cookie("userId", find.id, { signed: true });
@@ -50,25 +44,41 @@ module.exports.login = (req, res) => {
         res.cookie("role", find.role, { signed: true });
         res.status(200).json({
           status: "success",
-          message: "Login seccessfully",
+          message: "login seccessfully",
         });
       }
     }
   });
 };
 module.exports.createUser = (req, res) => {
-  let { email, password, userName, fistName, lastName, avatar } = req.body;
-  if (!userName) {
+  let { email, password, userName, lastName, avatar } = req.body;
+  if (!email && !password && !userName) {
     return res.status(500).json({
-      message: "Invalid username enough",
+      message: "Email end password , userName cannot be empty!",
     });
-  } else if (!email) {
+  } else if (!email && password && userName) {
     return res.status(500).json({
-      message: "Invalid email enough",
+      message: "Email cannot be empty!",
     });
-  } else if (!password) {
+  } else if (email && !password && userName) {
     return res.status(500).json({
-      message: "Invalid password enough",
+      message: "Password cannot be empty!",
+    });
+  } else if (email && password && !userName) {
+    return res.status(500).json({
+      message: "Username cannot be empty!",
+    });
+  } else if (!email && password && !userName) {
+    return res.status(500).json({
+      message: "Username end Email cannot be empty!",
+    });
+  } else if (email && !password && !userName) {
+    return res.status(500).json({
+      message: "Username end Password cannot be empty!",
+    });
+  } else if (!email && !password && userName) {
+    return res.status(500).json({
+      message: "Email end Password cannot be empty!",
     });
   } else {
     if (!strongRegex.test(password)) {
@@ -77,18 +87,19 @@ module.exports.createUser = (req, res) => {
       });
     } else {
       let id = Math.floor(Math.random() * 10000000);
-
       db.execute("SELECT*FROM users WHERE email=?", [email])
         .then((data) => {
           let [rows] = data;
           if (rows.length > 0) {
-            return Promise.reject("Email alreadey exits");
+            return res.status(500).json({
+              message: "user alreadey exits",
+            });
           } else {
             return db.execute("INSERT INTO users VALUES(?,?,?,?,?,?,?) ", [
               id,
               email,
               password,
-              null,
+              userName,
               null,
               null,
               1,
@@ -108,6 +119,22 @@ module.exports.createUser = (req, res) => {
     }
   }
 };
+
+module.exports.updatePass = (req, res) => {
+  //   console.log("update");
+  let { id } = req.params;
+  // console.log(req.body);
+  let { password } = req.body;
+  db.execute("UPDATE users SET password=? WHERE id=?", [password, id])
+    .then((data) => {
+      // console.log(data);
+      res.status(200).json({
+        message: "update one successfully",
+      });
+    })
+    .catch((err) => console.log(err));
+};
+
 module.exports.resetPassword = (req, res) => {
   let { email } = req.body;
   if (!email) {

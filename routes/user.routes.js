@@ -8,7 +8,8 @@ router.get("/hompage", userController.getHomePage);
 router.get("/posts", userController.getAllPosts);
 router.post("/loginUser", userController.login); //nhận thôngh tin về để đối chiếu database
 router.post("/createUser", userController.createUser); //nhận thông tin về để so sánh và xử lý trong database
-router.post("/resetPassword", userController.resetPassword);
+router.post("/forgotpassword", userController.resetPassword);
+router.put("/resetpassword/:id", userController.updatePass);
 router.post("/newPassword", userController.newPassword);
 router.put("/:id", userController.updateUser);
 

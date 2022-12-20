@@ -17,26 +17,12 @@ app.use(cors());
 app.use(express.static("public"));
 app.use(cookieParser("xaxxa"));
 
-let userRoutes =require('./routes/user.routes')
-
-
-
-
-
+let userRoutes = require("./routes/user.routes");
 
 app.get("/", (req, res) => {
   res.send("hello");
 });
-app.use("/user",userRoutes);
-
-
-
-
-
-
-
-
-
+app.use("/user", userRoutes);
 
 app.listen(port, () => {
   console.log(`server is running on port http://127.0.0.1:${port}`);
